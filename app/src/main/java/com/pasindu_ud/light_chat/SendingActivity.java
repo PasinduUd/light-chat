@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class SendingActivity extends AppCompatActivity {
-    private final double defaultDotDuration = (100.0 / 3);
+    private final double defaultDotDuration = 70;
     private final MorseCodeHandler morseCodeHandler = new MorseCodeHandler();
 
     private RecyclerView chatContainer;
