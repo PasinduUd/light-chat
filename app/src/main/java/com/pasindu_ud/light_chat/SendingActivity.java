@@ -83,7 +83,8 @@ public class SendingActivity extends AppCompatActivity {
     public void onReceiveButtonClick(View view) {
         Intent receivingIntent = new Intent(this, ReceivingActivity.class);
         startActivity(receivingIntent);
-        this.addMessageToChatContainer("Hi", ChatMessage.RECEIVED);
+        String receivedMessage = this.morseCodeHandler.decodeMessage(".- -...");
+        this.addMessageToChatContainer(receivedMessage, ChatMessage.RECEIVED);
         this.welcomeMessage.setVisibility(View.GONE);
     }
 

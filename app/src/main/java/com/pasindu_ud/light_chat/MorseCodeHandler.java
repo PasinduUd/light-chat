@@ -14,55 +14,55 @@ public class MorseCodeHandler {
 
     private void buildMorseCodeSignals() {
         this.morseCodeSignals = new HashMap<>();
-        morseCodeSignals.put("A", ".-");
-        morseCodeSignals.put("B", "-...");
-        morseCodeSignals.put("C", "-.-.");
-        morseCodeSignals.put("D", "-..");
-        morseCodeSignals.put("E", ".");
-        morseCodeSignals.put("F", "..-.");
-        morseCodeSignals.put("G", "--.");
-        morseCodeSignals.put("H", "....");
-        morseCodeSignals.put("I", "..");
-        morseCodeSignals.put("J", ".---");
-        morseCodeSignals.put("K", "-.-");
-        morseCodeSignals.put("L", ".-..");
-        morseCodeSignals.put("M", "--");
-        morseCodeSignals.put("N", "-.");
-        morseCodeSignals.put("O", "---");
-        morseCodeSignals.put("P", ".--.");
-        morseCodeSignals.put("Q", "--.-");
-        morseCodeSignals.put("R", ".-.");
-        morseCodeSignals.put("S", "...");
-        morseCodeSignals.put("T", "-");
-        morseCodeSignals.put("U", "..-");
-        morseCodeSignals.put("V", "...-");
-        morseCodeSignals.put("W", ".--");
-        morseCodeSignals.put("X", "-..-");
-        morseCodeSignals.put("Y", "-.--");
-        morseCodeSignals.put("Z", "--..");
-        morseCodeSignals.put("0", "-----");
-        morseCodeSignals.put("1", ".----");
-        morseCodeSignals.put("2", "..---");
-        morseCodeSignals.put("3", "...--");
-        morseCodeSignals.put("4", "....-");
-        morseCodeSignals.put("5", ".....");
-        morseCodeSignals.put("6", "-....");
-        morseCodeSignals.put("7", "--...");
-        morseCodeSignals.put("8", "---..");
-        morseCodeSignals.put("9", "----.");
-        morseCodeSignals.put("?", "..--..");
-        morseCodeSignals.put("!", "-.-.--");
-        morseCodeSignals.put(".", ".-.-.-");
-        morseCodeSignals.put(",", "--..--");
-        morseCodeSignals.put(";", "-.-.-.");
-        morseCodeSignals.put(":", "---...");
-        morseCodeSignals.put("+", ".-.-.");
-        morseCodeSignals.put("-", "-....-");
-        morseCodeSignals.put("/", "-..-.");
-        morseCodeSignals.put("=", "-...-");
-        morseCodeSignals.put(" ", " ");
-        morseCodeSignals.put("<start>", "...... ");
-        morseCodeSignals.put("<end>", " ......");
+        this.morseCodeSignals.put("A", ".-");
+        this.morseCodeSignals.put("B", "-...");
+        this.morseCodeSignals.put("C", "-.-.");
+        this.morseCodeSignals.put("D", "-..");
+        this.morseCodeSignals.put("E", ".");
+        this.morseCodeSignals.put("F", "..-.");
+        this.morseCodeSignals.put("G", "--.");
+        this.morseCodeSignals.put("H", "....");
+        this.morseCodeSignals.put("I", "..");
+        this.morseCodeSignals.put("J", ".---");
+        this.morseCodeSignals.put("K", "-.-");
+        this.morseCodeSignals.put("L", ".-..");
+        this.morseCodeSignals.put("M", "--");
+        this.morseCodeSignals.put("N", "-.");
+        this.morseCodeSignals.put("O", "---");
+        this.morseCodeSignals.put("P", ".--.");
+        this.morseCodeSignals.put("Q", "--.-");
+        this.morseCodeSignals.put("R", ".-.");
+        this.morseCodeSignals.put("S", "...");
+        this.morseCodeSignals.put("T", "-");
+        this.morseCodeSignals.put("U", "..-");
+        this.morseCodeSignals.put("V", "...-");
+        this.morseCodeSignals.put("W", ".--");
+        this.morseCodeSignals.put("X", "-..-");
+        this.morseCodeSignals.put("Y", "-.--");
+        this.morseCodeSignals.put("Z", "--..");
+        this.morseCodeSignals.put("0", "-----");
+        this.morseCodeSignals.put("1", ".----");
+        this.morseCodeSignals.put("2", "..---");
+        this.morseCodeSignals.put("3", "...--");
+        this.morseCodeSignals.put("4", "....-");
+        this.morseCodeSignals.put("5", ".....");
+        this.morseCodeSignals.put("6", "-....");
+        this.morseCodeSignals.put("7", "--...");
+        this.morseCodeSignals.put("8", "---..");
+        this.morseCodeSignals.put("9", "----.");
+        this.morseCodeSignals.put("?", "..--..");
+        this.morseCodeSignals.put("!", "-.-.--");
+        this.morseCodeSignals.put(".", ".-.-.-");
+        this.morseCodeSignals.put(",", "--..--");
+        this.morseCodeSignals.put(";", "-.-.-.");
+        this.morseCodeSignals.put(":", "---...");
+        this.morseCodeSignals.put("+", ".-.-.");
+        this.morseCodeSignals.put("-", "-....-");
+        this.morseCodeSignals.put("/", "-..-.");
+        this.morseCodeSignals.put("=", "-...-");
+        this.morseCodeSignals.put(" ", " ");
+        this.morseCodeSignals.put("<start>", "...... ");
+        this.morseCodeSignals.put("<end>", " ......");
     }
 
     public String encodeMessage(String message) {
@@ -79,7 +79,32 @@ public class MorseCodeHandler {
             }
         }
         messageBuilder.append(this.morseCodeSignals.get("<end>"));
+        Log.d("Message", "Message: " + messageBuilder);
         Log.d("EncodedMessage", "Encoded Message: " + messageBuilder);
         return messageBuilder.toString();
+    }
+
+    public String decodeMessage(String encodedMessage) {
+        StringBuilder messageBuilder = new StringBuilder();
+        String[] morseCharacters = encodedMessage.split(" ");
+
+        for (String morseCharacter : morseCharacters) {
+            if (this.morseCodeSignals.containsValue(morseCharacter)) {
+                messageBuilder.append(getKeyByValue(this.morseCodeSignals, morseCharacter));
+            }
+        }
+        String decodedMessage = messageBuilder.toString();
+        Log.d("ReceivedMessage", "Received Message: " + encodedMessage);
+        Log.d("DecodedMessage", "Decoded Message: " + decodedMessage);
+        return decodedMessage.charAt(0) + decodedMessage.substring(1).toLowerCase();
+    }
+
+    private <K, V> K getKeyByValue(HashMap<K, V> map, V value) {
+        for (HashMap.Entry<K, V> entry : map.entrySet()) {
+            if (entry.getValue().equals(value)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 }
