@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">LightChat</string>
+    <string name="message">Message</string>
+    <string name="dot_duration">Dot Duration</string>
+    <string name="send">Send</string>
+    <string name="receive">Receive</string>
+    <string name="welcome_to_light_chat">Welcome to LightChat !</string>
+</resources>
