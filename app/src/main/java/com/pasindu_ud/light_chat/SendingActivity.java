@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class SendingActivity extends AppCompatActivity {
-    private final double defaultDotDuration = 70;
+    private final double defaultDotDuration = 100;
     private final MorseCodeHandler morseCodeHandler = new MorseCodeHandler();
 
     private RecyclerView chatContainer;
@@ -68,6 +68,7 @@ public class SendingActivity extends AppCompatActivity {
                 try {
                     FlashLightHandler flashLightHandler = new FlashLightHandler((CameraManager) getSystemService(Context.CAMERA_SERVICE));
                     flashLightHandler.transmitEncodedMessage(encodedMessage, (long) Double.parseDouble(dotDuration));
+                    dotDurationInput.setText(dotDuration);
                     this.addMessageToChatContainer(message, ChatMessage.SENT);
                     this.welcomeMessage.setVisibility(View.GONE);
                 } catch (CameraAccessException e) {
@@ -95,6 +96,7 @@ public class SendingActivity extends AppCompatActivity {
             // Get the data passed from the current intent
             String passedMessage = data.getStringExtra("received_message");
             if ((!passedMessage.isEmpty()) && (!passedMessage.equals("Focus the Camera on the Flashlight."))) {
+                if (passedMessage.length() > 1) passedMessage = passedMessage.charAt(0) + passedMessage.substring(1).toLowerCase();
                 this.addMessageToChatContainer(passedMessage, ChatMessage.RECEIVED);
                 this.welcomeMessage.setVisibility(View.GONE);
             }
