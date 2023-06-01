@@ -40,29 +40,31 @@ public class MorseCodeHandler {
         this.morseCodeSignals.put("X", "-..-");
         this.morseCodeSignals.put("Y", "-.--");
         this.morseCodeSignals.put("Z", "--..");
-        this.morseCodeSignals.put("0", "-----");
-        this.morseCodeSignals.put("1", ".----");
-        this.morseCodeSignals.put("2", "..---");
-        this.morseCodeSignals.put("3", "...--");
-        this.morseCodeSignals.put("4", "....-");
-        this.morseCodeSignals.put("5", ".....");
-        this.morseCodeSignals.put("6", "-....");
-        this.morseCodeSignals.put("7", "--...");
-        this.morseCodeSignals.put("8", "---..");
-        this.morseCodeSignals.put("9", "----.");
-        this.morseCodeSignals.put("?", "..--..");
-        this.morseCodeSignals.put("!", "-.-.--");
-        this.morseCodeSignals.put(".", ".-.-.-");
-        this.morseCodeSignals.put(",", "--..--");
-        this.morseCodeSignals.put(";", "-.-.-.");
-        this.morseCodeSignals.put(":", "---...");
-        this.morseCodeSignals.put("+", ".-.-.");
-        this.morseCodeSignals.put("-", "-....-");
-        this.morseCodeSignals.put("/", "-..-.");
-        this.morseCodeSignals.put("=", "-...-");
+//        this.morseCodeSignals.put("0", "-----");
+//        this.morseCodeSignals.put("1", ".----");
+//        this.morseCodeSignals.put("2", "..---");
+//        this.morseCodeSignals.put("3", "...--");
+//        this.morseCodeSignals.put("4", "....-");
+//        this.morseCodeSignals.put("5", ".....");
+//        this.morseCodeSignals.put("6", "-....");
+//        this.morseCodeSignals.put("7", "--...");
+//        this.morseCodeSignals.put("8", "---..");
+//        this.morseCodeSignals.put("9", "----.");
+//        this.morseCodeSignals.put("?", "..--..");
+//        this.morseCodeSignals.put("!", "-.-.--");
+//        this.morseCodeSignals.put(".", ".-.-.-");
+//        this.morseCodeSignals.put(",", "--..--");
+//        this.morseCodeSignals.put(";", "-.-.-.");
+//        this.morseCodeSignals.put(":", "---...");
+//        this.morseCodeSignals.put("+", ".-.-.");
+//        this.morseCodeSignals.put("-", "-....-");
+//        this.morseCodeSignals.put("/", "-..-.");
+//        this.morseCodeSignals.put("=", "-...-");
         this.morseCodeSignals.put(" ", " ");
-        this.morseCodeSignals.put("<start>", "...... ");
-        this.morseCodeSignals.put("<end>", " ......");
+//        this.morseCodeSignals.put("<start>", "...... ");
+//        this.morseCodeSignals.put("<end>", " ......");
+        this.morseCodeSignals.put("<start>", "-.-.- ");
+        this.morseCodeSignals.put("<end>", " .-.-");
     }
 
     public String encodeMessage(String message) {
@@ -79,8 +81,8 @@ public class MorseCodeHandler {
             }
         }
         messageBuilder.append(this.morseCodeSignals.get("<end>"));
-        Log.d("Message", "Message: " + messageBuilder);
-        Log.d("EncodedMessage", "Encoded Message: " + messageBuilder);
+        Log.d("MESSAGE", "Message: " + messageBuilder);
+        Log.d("ENCODED_MESSAGE", "Encoded Message: " + messageBuilder);
         return messageBuilder.toString();
     }
 
@@ -94,9 +96,9 @@ public class MorseCodeHandler {
             }
         }
         String decodedMessage = messageBuilder.toString();
-        Log.d("ReceivedMessage", "Received Message: " + encodedMessage);
-        Log.d("DecodedMessage", "Decoded Message: " + decodedMessage);
-        return decodedMessage.charAt(0) + decodedMessage.substring(1).toLowerCase();
+        Log.d("RECEIVED_MESSAGE", "Received Message: " + encodedMessage);
+        Log.d("DECODED_MESSAGE", "Decoded Message: " + decodedMessage);
+        return decodedMessage;
     }
 
     private <K, V> K getKeyByValue(HashMap<K, V> map, V value) {

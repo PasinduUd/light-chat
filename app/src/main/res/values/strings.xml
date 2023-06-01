@@ -5,4 +5,11 @@
     <string name="send">Send</string>
     <string name="receive">Receive</string>
     <string name="welcome_to_light_chat">Welcome to LightChat !</string>
+    <string name="threshold_label">Binary Threshold</string>
+    <string name="contour_area_label">Contour Area</string>
+    <string name="stop_receiving">Stop Receiving</string>
+    <string name="back_to_chat">Back to Chat</string>
+    <string name="threshold_slider_description">Binary Threshold Slider</string>
+    <string name="contour_area_slider_description">Contour Area Slider</string>
+    <string name="initial_receiving_message">Focus the Camera on the Flashlight.</string>
 </resources>

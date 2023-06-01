@@ -7,13 +7,111 @@
     tools:context=".ReceivingActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/thresholdLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/threshold_label"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/thresholdSlider"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/thresholdSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stepSize="5"
+        android:valueFrom="90"
+        android:valueTo="255"
+        android:layout_marginHorizontal="16dp"
+        android:contentDescription="@string/threshold_slider_description"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/thresholdLabel"
+        app:layout_constraintBottom_toTopOf="@+id/contourAreaLabel"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/contourAreaLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/contour_area_label"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/thresholdSlider"
+        app:layout_constraintBottom_toTopOf="@+id/contourAreaSlider"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/contourAreaSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stepSize="20000"
+        android:valueFrom="200000"
+        android:valueTo="800000"
+        android:layout_marginHorizontal="16dp"
+        android:contentDescription="@string/contour_area_slider_description"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/contourAreaLabel"
+        app:layout_constraintBottom_toTopOf="@+id/cameraView"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <org.opencv.android.JavaCameraView
+        android:id="@+id/cameraView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/contourAreaSlider"
+        app:layout_constraintBottom_toTopOf="@+id/receivedMessage" />
+
+    <TextView
+        android:id="@+id/receivedMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Camera"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/initial_receiving_message"
+        android:layout_marginHorizontal="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/cameraView"
+        app:layout_constraintBottom_toTopOf="@+id/receiverButtons"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/receiverButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/receivedMessage"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" >
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stopReceivingButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="@string/stop_receiving"
+            android:textSize="13.25sp"
+            android:onClick="onStopReceivingButtonClick"
+            app:backgroundTint="@color/lochmara"
+            tools:ignore="ButtonStyle" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backToChat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="@string/back_to_chat"
+            android:onClick="onBackToChatButtonClick"
+            app:backgroundTint="@color/lochmara"
+            tools:ignore="ButtonStyle" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

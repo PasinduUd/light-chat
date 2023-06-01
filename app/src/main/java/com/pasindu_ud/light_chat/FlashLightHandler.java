@@ -32,7 +32,7 @@ public class FlashLightHandler {
                 case "-":
                     this.turnOnFlashlight(dotDuration * 3);
                     break;
-                case "/":
+                case " ":
                     Thread.sleep(dotDuration * 7);
                     break;
             }

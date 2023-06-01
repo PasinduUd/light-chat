@@ -22,13 +22,14 @@ import java.util.List;
 import java.util.Objects;
 
 public class SendingActivity extends AppCompatActivity {
-    private final double defaultDotDuration = (100.0 / 3);
+    private final double defaultDotDuration = 100;
     private final MorseCodeHandler morseCodeHandler = new MorseCodeHandler();
 
     private RecyclerView chatContainer;
     private TextView welcomeMessage;
     private List<ChatMessage> chatMessages;
     private ChatMessageAdapter chatMessageAdapter;
+    private static final int REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +68,7 @@ public class SendingActivity extends AppCompatActivity {
                 try {
                     FlashLightHandler flashLightHandler = new FlashLightHandler((CameraManager) getSystemService(Context.CAMERA_SERVICE));
                     flashLightHandler.transmitEncodedMessage(encodedMessage, (long) Double.parseDouble(dotDuration));
+                    dotDurationInput.setText(dotDuration);
                     this.addMessageToChatContainer(message, ChatMessage.SENT);
                     this.welcomeMessage.setVisibility(View.GONE);
                 } catch (CameraAccessException e) {
@@ -82,10 +84,23 @@ public class SendingActivity extends AppCompatActivity {
 
     public void onReceiveButtonClick(View view) {
         Intent receivingIntent = new Intent(this, ReceivingActivity.class);
-        startActivity(receivingIntent);
-        String receivedMessage = this.morseCodeHandler.decodeMessage(".- -...");
-        this.addMessageToChatContainer(receivedMessage, ChatMessage.RECEIVED);
-        this.welcomeMessage.setVisibility(View.GONE);
+//        startActivity(receivingIntent);
+        startActivityForResult(receivingIntent, REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            // Get the data passed from the current intent
+            String passedMessage = data.getStringExtra("received_message");
+            if ((!passedMessage.isEmpty()) && (!passedMessage.equals("Focus the Camera on the Flashlight."))) {
+                if (passedMessage.length() > 1) passedMessage = passedMessage.charAt(0) + passedMessage.substring(1).toLowerCase();
+                this.addMessageToChatContainer(passedMessage, ChatMessage.RECEIVED);
+                this.welcomeMessage.setVisibility(View.GONE);
+            }
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
