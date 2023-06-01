@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class SendingActivity extends AppCompatActivity {
-    private final double defaultDotDuration = 100;
+    private final double defaultDotDuration = 70;
     private final MorseCodeHandler morseCodeHandler = new MorseCodeHandler();
 
     private RecyclerView chatContainer;
@@ -67,6 +67,9 @@ public class SendingActivity extends AppCompatActivity {
                 String encodedMessage = morseCodeHandler.encodeMessage(message);
                 try {
                     FlashLightHandler flashLightHandler = new FlashLightHandler((CameraManager) getSystemService(Context.CAMERA_SERVICE));
+                    if ((Double.parseDouble(dotDuration) < 50) || (Double.parseDouble(dotDuration) > 150)) {
+                        dotDuration = String.valueOf(this.defaultDotDuration);
+                    }
                     flashLightHandler.transmitEncodedMessage(encodedMessage, (long) Double.parseDouble(dotDuration));
                     dotDurationInput.setText(dotDuration);
                     this.addMessageToChatContainer(message, ChatMessage.SENT);
