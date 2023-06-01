@@ -94,7 +94,7 @@ public class SendingActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             // Get the data passed from the current intent
             String passedMessage = data.getStringExtra("received_message");
-            if (!passedMessage.isEmpty()) {
+            if ((!passedMessage.isEmpty()) && (!passedMessage.equals("Focus the Camera on the Flashlight."))) {
                 this.addMessageToChatContainer(passedMessage, ChatMessage.RECEIVED);
                 this.welcomeMessage.setVisibility(View.GONE);
             }
