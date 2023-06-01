@@ -100,8 +100,9 @@ public class ReceivingActivity extends CameraActivity {
                         spaceCount = 0;
                     } else {
                         if (isFlashlightOn) {
-                            if (illuminatedFrameCount >= 3) morseCodeBuilder.append('-');
-                            else if (illuminatedFrameCount >= 1) morseCodeBuilder.append('.');
+                            if (illuminatedFrameCount >= 3) morseCodeBuilder.append("-");
+                            else if (illuminatedFrameCount >= 1) morseCodeBuilder.append(".");
+                            else morseCodeBuilder.append("");
                         } else {
                             if (!morseCodeBuilder.toString().equals("")) {
                                 darkFrameCount++;
@@ -142,7 +143,7 @@ public class ReceivingActivity extends CameraActivity {
                                             }
                                             decodedCharacterList.add(this.morseCodeHandler.decodeMessage(character.replaceAll("_", " ")));
                                         }
-                                        receivedMessage.setText(String.join("", decodedCharacterList));
+                                        runOnUiThread(() -> receivedMessage.setText(String.join("", decodedCharacterList)));
                                     }
                                 }
                             }
@@ -156,16 +157,17 @@ public class ReceivingActivity extends CameraActivity {
                 if (!isFlashlightOn) {
                     String morseCode = morseCodeBuilder.toString().trim();
 
-                    if (morseCode.endsWith(" ......")) {
-                        if (morseCode.contains("......")) {
+                    if (morseCode.endsWith(" .-.-")) {
+                        if (morseCode.contains("-.-.-")) {
                             morseCode = morseCode.substring(6, morseCode.length() - 5);
                             String[] morseCodeList = morseCode.split("_");
                             for (String morseCodeWord : morseCodeList) {
                                 wordList.add(this.morseCodeHandler.decodeMessage(morseCodeWord));
                             }
                             String message = String.join(" ", wordList);
-                            Log.d("MorseCode", "Message: " + message);
-                            receivedMessage.setText(message);
+                            Log.d("MORSE_CODED_MESSAGE", "Message: " + message);
+                            runOnUiThread(() -> receivedMessage.setText(message));
+                            stopReceiving(); // Successfully received
                         }
                         morseCodeBuilder.setLength(0);
                         wordList = new ArrayList<>();
