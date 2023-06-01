@@ -29,6 +29,7 @@ public class SendingActivity extends AppCompatActivity {
     private TextView welcomeMessage;
     private List<ChatMessage> chatMessages;
     private ChatMessageAdapter chatMessageAdapter;
+    private static final int REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,10 +83,22 @@ public class SendingActivity extends AppCompatActivity {
 
     public void onReceiveButtonClick(View view) {
         Intent receivingIntent = new Intent(this, ReceivingActivity.class);
-        startActivity(receivingIntent);
-        String receivedMessage = this.morseCodeHandler.decodeMessage(".- -...");
-        this.addMessageToChatContainer(receivedMessage, ChatMessage.RECEIVED);
-        this.welcomeMessage.setVisibility(View.GONE);
+//        startActivity(receivingIntent);
+        startActivityForResult(receivingIntent, REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            // Get the data passed from the current intent
+            String passedMessage = data.getStringExtra("received_message");
+            if (!passedMessage.isEmpty()) {
+                this.addMessageToChatContainer(passedMessage, ChatMessage.RECEIVED);
+                this.welcomeMessage.setVisibility(View.GONE);
+            }
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")

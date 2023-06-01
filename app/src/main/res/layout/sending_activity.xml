@@ -42,17 +42,17 @@
             style="@style/TextInputLayoutStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.6"
+            android:layout_weight="0.65"
             android:layout_marginEnd="8dp"
             app:counterEnabled="true"
-            app:counterMaxLength="15"
+            app:counterMaxLength="20"
             android:hint="@string/message" >
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/messageInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLength="15"
+                android:maxLength="20"
                 android:inputType="textShortMessage"/>
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -61,7 +61,7 @@
             style="@style/TextInputLayoutStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.4"
+            android:layout_weight="0.35"
             android:layout_marginStart="8dp"
             app:counterEnabled="true"
             app:counterMaxLength="6"
