@@ -7,61 +7,66 @@ import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
 import static org.opencv.imgproc.Imgproc.contourArea;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 import static org.opencv.imgproc.Imgproc.findContours;
-import static org.opencv.imgproc.Imgproc.resize;
 import static org.opencv.imgproc.Imgproc.threshold;
-import static org.opencv.imgproc.Imgproc.drawContours;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.material.slider.Slider;
+
 import org.opencv.android.CameraActivity;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class ReceivingActivity extends CameraActivity {
     CameraBridgeViewBase cameraBridgeViewBase;
-    Button button;
-    TextView labelField;
+    TextView receivedMessage;
+    private int binaryThreshold;
+    private int contourArea;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.receiving_activity);
+        this.getCameraPermission();
 
-        getPermission();
-
+        Slider thresholdSlider = findViewById(R.id.thresholdSlider);
+        Slider contourAreaSlider = findViewById(R.id.contourAreaSlider);
         cameraBridgeViewBase = findViewById(R.id.cameraView);
-        button = findViewById(R.id.backToChat);
-        labelField = findViewById(R.id.receivedMessage);
+        receivedMessage = findViewById(R.id.receivedMessage);
+
+        int defaultBinaryThreshold = 100;
+        int defaultContourArea = 300000;
+        thresholdSlider.setValue(defaultBinaryThreshold);
+        contourAreaSlider.setValue(defaultContourArea);
+        this.binaryThreshold = defaultBinaryThreshold;
+        this.contourArea = defaultContourArea;
+
+        thresholdSlider.addOnChangeListener((slider, value, fromUser) -> binaryThreshold = (int) value);
+        contourAreaSlider.addOnChangeListener((slider, value, fromUser) -> contourArea = (int) value);
 
         cameraBridgeViewBase.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
             private boolean isFlashlightOn = false;
-            private long prevTime = 0;
             private int illuminatedFrameCount = 0;
             private int darkFrameCount = 0;
-            private final StringBuilder morseCodeBuilder = new StringBuilder();
             private int spaceCount = 0;
-            private List<String> morseCodeList = new ArrayList<>();
+            private final StringBuilder morseCodeBuilder = new StringBuilder();
             private List<String> wordList = new ArrayList<>();
-            private static final long DOT_DURATION = 40;
+            private boolean startDetected = true;
             private final MorseCodeHandler morseCodeHandler = new MorseCodeHandler();
             @Override
             public void onCameraViewStarted(int width, int height) {
@@ -73,53 +78,30 @@ public class ReceivingActivity extends CameraActivity {
 
             @Override
             public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-//                Mat resizedFrame = new Mat();
-//                resize(inputFrame.rgba(), resizedFrame, new Size(inputFrame.rgba().cols() / 2, inputFrame.rgba().rows() / 2));
 
-                // Convert input frame to grayscale
                 Mat gray = new Mat();
-//                cvtColor(resizedFrame, gray, COLOR_RGBA2GRAY);
-                cvtColor(inputFrame.rgba(), gray, COLOR_RGBA2GRAY);
+                cvtColor(inputFrame.rgba(), gray, COLOR_RGBA2GRAY); // Convert the input frame to grayscale
 
-                // Apply threshold to convert to binary image
                 Mat binary = new Mat();
-                threshold(gray, binary, 100, 255, THRESH_BINARY);
-//                double brightness = Core.mean(binary).val[0];
-//                if (brightness > 120 ) Log.d("Brightness","brightness " + brightness);
-                // Find contours in the binary image
+                threshold(gray, binary, binaryThreshold, 255, THRESH_BINARY); // Convert the grayscale image to binary
                 List<MatOfPoint> contours = new ArrayList<>();
 
                 Mat hierarchy = new Mat();
-                findContours(binary, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
-//                Mat outputFrame = binary.clone();
-//
-//                // Draw contours on the output frame
-//                drawContours(outputFrame, contours, -1, new Scalar(0, 255, 0), 2);
-//
-//                // ...
-//
-//                // Return the output frame
-//                return outputFrame;
-                long currentTime = System.currentTimeMillis();
+                findContours(binary, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE); // Find contours in the binary image
 
-                // Iterate through all the detected contours
                 if (!contours.isEmpty()) {
                     MatOfPoint contour = contours.get(0);
                     double area = contourArea(contour);
-                    Log.d("AreaCont", "Area: " + area);
-                    if (area > 300000) { // Adjust this threshold based on flashlight beam size
-                        Log.d("AreaContMore", "AreaMore: " + area);
+                    Log.d("CONTOUR_AREA", "Contour Area : " + area);
+                    if (area > contourArea) { // Check if the area of the contour exceeds a threshold (flashlight beam size)
                         illuminatedFrameCount++;
                         isFlashlightOn = true;
                         darkFrameCount = 0;
                         spaceCount = 0;
                     } else {
                         if (isFlashlightOn) {
-                            if (illuminatedFrameCount >= 3) {
-                                morseCodeBuilder.append('-');
-                            } else if (illuminatedFrameCount >= 1) {
-                                morseCodeBuilder.append('.');
-                            }
+                            if (illuminatedFrameCount >= 3) morseCodeBuilder.append('-');
+                            else if (illuminatedFrameCount >= 1) morseCodeBuilder.append('.');
                         } else {
                             if (!morseCodeBuilder.toString().equals("")) {
                                 darkFrameCount++;
@@ -130,9 +112,29 @@ public class ReceivingActivity extends CameraActivity {
                                         spaceCount = 0;
                                     } else if (spaceCount == 1 && !morseCodeBuilder.toString().endsWith("_")) {
                                         morseCodeBuilder.append(' ');
-                                        Log.d("MorseCodeBuilderLen", "Message: " + morseCodeBuilder.toString() + " Length: " +  morseCodeBuilder.length());
-                                        String[] characterList = morseCodeBuilder.toString().substring(6, morseCodeBuilder.length()).split(" ");
-//                                        String[] characterList = morseCodeBuilder.toString().substring(0, morseCodeBuilder.length()).split(" ");
+
+                                        Log.d("MORSE_CODE_LENGTH", "Message : " + morseCodeBuilder + ", Length : " +  morseCodeBuilder.length());
+                                        String morseCodeBuilderString = morseCodeBuilder.toString();
+
+                                        // Check if the Morse code message initiation failed
+                                        if (morseCodeBuilderString.length() < 6) {
+                                            // Display a warning dialog if the length of the Morse code is less than 6 characters
+                                            runOnUiThread(() -> {
+                                                AlertDialog.Builder builder = new AlertDialog.Builder(ReceivingActivity.this);
+                                                builder.setTitle("Warning !")
+                                                        .setMessage("Message Initiation Failed.")
+                                                        .setPositiveButton("BACK TO CHAT", (dialog, which) -> stopReceiving())
+                                                        .setCancelable(false)
+                                                        .show();
+                                            });
+                                            startDetected = false;
+                                            return binary;
+                                        }
+
+                                        if (!startDetected) return binary; // Restrict further processing
+
+                                        // Decode the Morse code message
+                                        String[] characterList = morseCodeBuilderString.substring(6).split(" ");
                                         List<String> decodedCharacterList = new ArrayList<>();
                                         for (String character : characterList) {
                                             if (character.contains("_")) {
@@ -140,60 +142,36 @@ public class ReceivingActivity extends CameraActivity {
                                             }
                                             decodedCharacterList.add(this.morseCodeHandler.decodeMessage(character.replaceAll("_", " ")));
                                         }
-                                        labelField.setText(String.join("", decodedCharacterList));
+                                        receivedMessage.setText(String.join("", decodedCharacterList));
                                     }
                                 }
                             }
                         }
-                        if (illuminatedFrameCount > 0) {
-                            Log.d("Illuminated", "Illu " + illuminatedFrameCount);
-                        }
-                        if (morseCodeBuilder.toString().length() == 1) {
-                            prevTime = currentTime;
-                        }
+                        Log.d("ILLUMINATED_FRAMES", "Illuminated Frame Count : " + illuminatedFrameCount);
                         illuminatedFrameCount = 0;
                         isFlashlightOn = false;
                     }
                 }
 
-                if (prevTime == 0) {
-                    prevTime = currentTime;
-                }
-
                 if (!isFlashlightOn) {
-                    // Decode Morse code
                     String morseCode = morseCodeBuilder.toString().trim();
 
-                    if (morseCode.endsWith(" .-.-")) {
-                        if (morseCode.contains("-.-.-")) {
+                    if (morseCode.endsWith(" ......")) {
+                        if (morseCode.contains("......")) {
                             morseCode = morseCode.substring(6, morseCode.length() - 5);
-                            morseCodeList = Arrays.asList(morseCode.split("_"));
+                            String[] morseCodeList = morseCode.split("_");
                             for (String morseCodeWord : morseCodeList) {
                                 wordList.add(this.morseCodeHandler.decodeMessage(morseCodeWord));
                             }
                             String message = String.join(" ", wordList);
                             Log.d("MorseCode", "Message: " + message);
-                            labelField.setText(message);
+                            receivedMessage.setText(message);
                         }
-//                        else {
-//                            labelField.setText("");
-//                        }
                         morseCodeBuilder.setLength(0);
                         wordList = new ArrayList<>();
-                        morseCodeList = new ArrayList<>();
-                        prevTime = 0;
                     }
                 }
-
                 return binary;
-            }
-        });
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ReceivingActivity.this, SendingActivity.class);
-                startActivity(intent);
             }
         });
 
@@ -204,28 +182,23 @@ public class ReceivingActivity extends CameraActivity {
             Log.d("LOADED_OPENCV", "Unsuccessful");
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
-        if (cameraBridgeViewBase != null) {
-            cameraBridgeViewBase.enableView();
-        }
+        if (cameraBridgeViewBase != null) cameraBridgeViewBase.enableView();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (cameraBridgeViewBase != null) {
-            cameraBridgeViewBase.disableView();
-        }
+        if (cameraBridgeViewBase != null) cameraBridgeViewBase.disableView();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (cameraBridgeViewBase != null) {
-            cameraBridgeViewBase.disableView();
-        }
+        if (cameraBridgeViewBase != null) cameraBridgeViewBase.disableView();
     }
 
     @Override
@@ -234,19 +207,33 @@ public class ReceivingActivity extends CameraActivity {
 
     }
 
-    void getPermission() {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode==3 && grantResults.length > 0) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) getCameraPermission();
+        }
+    }
+
+    void getCameraPermission() {
         if(checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{android.Manifest.permission.CAMERA}, 3);
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode==3 && grantResults.length > 0) {
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                getPermission();
-            }
-        }
+    private void stopReceiving() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("received_message", this.receivedMessage.getText());
+        setResult(RESULT_OK, resultIntent);
+        finish();
+    }
+
+    @SuppressLint("SetTextI18n")
+    public void onStopReceivingButtonClick(View view) {
+        this.stopReceiving();
+    }
+
+    public void onBackToChatButtonClick(View view) {
+        finish();
     }
 }
