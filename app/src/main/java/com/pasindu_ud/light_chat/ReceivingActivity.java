@@ -60,14 +60,15 @@ public class ReceivingActivity extends CameraActivity {
         contourAreaSlider.addOnChangeListener((slider, value, fromUser) -> contourArea = (int) value);
 
         cameraBridgeViewBase.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
+            private final StringBuilder morseCodeBuilder = new StringBuilder();
+            private final MorseCodeHandler morseCodeHandler = new MorseCodeHandler();
             private boolean isFlashlightOn = false;
             private int illuminatedFrameCount = 0;
             private int darkFrameCount = 0;
             private int spaceCount = 0;
-            private final StringBuilder morseCodeBuilder = new StringBuilder();
             private List<String> wordList = new ArrayList<>();
             private boolean startDetected = true;
-            private final MorseCodeHandler morseCodeHandler = new MorseCodeHandler();
+
             @Override
             public void onCameraViewStarted(int width, int height) {
             }
@@ -114,7 +115,7 @@ public class ReceivingActivity extends CameraActivity {
                                     } else if (spaceCount == 1 && !morseCodeBuilder.toString().endsWith("_")) {
                                         morseCodeBuilder.append(' ');
 
-                                        Log.d("MORSE_CODE_LENGTH", "Message : " + morseCodeBuilder + ", Length : " +  morseCodeBuilder.length());
+                                        Log.d("MORSE_CODE_LENGTH", "Message : " + morseCodeBuilder + ", Length : " + morseCodeBuilder.length());
                                         String morseCodeBuilderString = morseCodeBuilder.toString();
 
                                         // Check if the Morse code message initiation failed
@@ -132,7 +133,8 @@ public class ReceivingActivity extends CameraActivity {
                                             return binary;
                                         }
 
-                                        if (!startDetected) return binary; // Restrict further processing
+                                        if (!startDetected)
+                                            return binary; // Restrict further processing
 
                                         // Decode the Morse code message
                                         String[] characterList = morseCodeBuilderString.substring(6).split(" ");
@@ -212,13 +214,13 @@ public class ReceivingActivity extends CameraActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode==3 && grantResults.length > 0) {
+        if (requestCode == 3 && grantResults.length > 0) {
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) getCameraPermission();
         }
     }
 
     void getCameraPermission() {
-        if(checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{android.Manifest.permission.CAMERA}, 3);
         }
     }

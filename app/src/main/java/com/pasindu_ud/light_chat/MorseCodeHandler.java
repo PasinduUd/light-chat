@@ -61,7 +61,7 @@ public class MorseCodeHandler {
         message = message.trim().toUpperCase();
         for (int i = 0; i < message.length(); i++) {
             String character = Character.toString(message.charAt(i));
-            if (this.morseCodeSignals.containsKey(character)){
+            if (this.morseCodeSignals.containsKey(character)) {
                 messageBuilder.append(this.morseCodeSignals.get(character));
                 if (i != message.length() - 1) {
                     messageBuilder.append(" ");
