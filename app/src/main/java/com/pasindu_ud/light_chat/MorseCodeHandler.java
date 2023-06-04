@@ -40,29 +40,17 @@ public class MorseCodeHandler {
         this.morseCodeSignals.put("X", "-..-");
         this.morseCodeSignals.put("Y", "-.--");
         this.morseCodeSignals.put("Z", "--..");
-//        this.morseCodeSignals.put("0", "-----");
-//        this.morseCodeSignals.put("1", ".----");
-//        this.morseCodeSignals.put("2", "..---");
-//        this.morseCodeSignals.put("3", "...--");
-//        this.morseCodeSignals.put("4", "....-");
-//        this.morseCodeSignals.put("5", ".....");
-//        this.morseCodeSignals.put("6", "-....");
-//        this.morseCodeSignals.put("7", "--...");
-//        this.morseCodeSignals.put("8", "---..");
-//        this.morseCodeSignals.put("9", "----.");
-//        this.morseCodeSignals.put("?", "..--..");
-//        this.morseCodeSignals.put("!", "-.-.--");
-//        this.morseCodeSignals.put(".", ".-.-.-");
-//        this.morseCodeSignals.put(",", "--..--");
-//        this.morseCodeSignals.put(";", "-.-.-.");
-//        this.morseCodeSignals.put(":", "---...");
-//        this.morseCodeSignals.put("+", ".-.-.");
-//        this.morseCodeSignals.put("-", "-....-");
-//        this.morseCodeSignals.put("/", "-..-.");
-//        this.morseCodeSignals.put("=", "-...-");
+        this.morseCodeSignals.put("0", "-----");
+        this.morseCodeSignals.put("1", ".----");
+        this.morseCodeSignals.put("2", "..---");
+        this.morseCodeSignals.put("3", "...--");
+        this.morseCodeSignals.put("4", "....-");
+        this.morseCodeSignals.put("5", ".....");
+        this.morseCodeSignals.put("6", "-....");
+        this.morseCodeSignals.put("7", "--...");
+        this.morseCodeSignals.put("8", "---..");
+        this.morseCodeSignals.put("9", "----.");
         this.morseCodeSignals.put(" ", " ");
-//        this.morseCodeSignals.put("<start>", "...... ");
-//        this.morseCodeSignals.put("<end>", " ......");
         this.morseCodeSignals.put("<start>", "-.-.- ");
         this.morseCodeSignals.put("<end>", " .-.-");
     }
@@ -73,7 +61,7 @@ public class MorseCodeHandler {
         message = message.trim().toUpperCase();
         for (int i = 0; i < message.length(); i++) {
             String character = Character.toString(message.charAt(i));
-            if (this.morseCodeSignals.containsKey(character)){
+            if (this.morseCodeSignals.containsKey(character)) {
                 messageBuilder.append(this.morseCodeSignals.get(character));
                 if (i != message.length() - 1) {
                     messageBuilder.append(" ");

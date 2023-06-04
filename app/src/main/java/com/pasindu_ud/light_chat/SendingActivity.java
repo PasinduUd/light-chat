@@ -1,9 +1,5 @@
 package com.pasindu_ud.light_chat;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +11,10 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -22,14 +22,13 @@ import java.util.List;
 import java.util.Objects;
 
 public class SendingActivity extends AppCompatActivity {
-    private final double defaultDotDuration = 100;
+    private static final int REQUEST_CODE = 1;
+    private final double defaultDotDuration = 70;
     private final MorseCodeHandler morseCodeHandler = new MorseCodeHandler();
-
     private RecyclerView chatContainer;
     private TextView welcomeMessage;
     private List<ChatMessage> chatMessages;
     private ChatMessageAdapter chatMessageAdapter;
-    private static final int REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +66,14 @@ public class SendingActivity extends AppCompatActivity {
                 String encodedMessage = morseCodeHandler.encodeMessage(message);
                 try {
                     FlashLightHandler flashLightHandler = new FlashLightHandler((CameraManager) getSystemService(Context.CAMERA_SERVICE));
+                    if ((Double.parseDouble(dotDuration) < 50) || (Double.parseDouble(dotDuration) > 150)) {
+                        dotDuration = String.valueOf(this.defaultDotDuration);
+                    }
                     flashLightHandler.transmitEncodedMessage(encodedMessage, (long) Double.parseDouble(dotDuration));
                     dotDurationInput.setText(dotDuration);
                     this.addMessageToChatContainer(message, ChatMessage.SENT);
                     this.welcomeMessage.setVisibility(View.GONE);
+                    messageInput.setText("");
                 } catch (CameraAccessException e) {
                     Toast.makeText(SendingActivity.this, "Camera is not available.", Toast.LENGTH_LONG).show();
                 } catch (InterruptedException e) {
@@ -96,7 +99,8 @@ public class SendingActivity extends AppCompatActivity {
             // Get the data passed from the current intent
             String passedMessage = data.getStringExtra("received_message");
             if ((!passedMessage.isEmpty()) && (!passedMessage.equals("Focus the Camera on the Flashlight."))) {
-                if (passedMessage.length() > 1) passedMessage = passedMessage.charAt(0) + passedMessage.substring(1).toLowerCase();
+                if (passedMessage.length() > 1)
+                    passedMessage = passedMessage.charAt(0) + passedMessage.substring(1).toLowerCase();
                 this.addMessageToChatContainer(passedMessage, ChatMessage.RECEIVED);
                 this.welcomeMessage.setVisibility(View.GONE);
             }

@@ -36,7 +36,7 @@ public class ReceivingActivity extends CameraActivity {
     CameraBridgeViewBase cameraBridgeViewBase;
     TextView receivedMessage;
     private int binaryThreshold;
-    private int contourArea;
+    private int contourAreaThreshold;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,20 +54,21 @@ public class ReceivingActivity extends CameraActivity {
         thresholdSlider.setValue(defaultBinaryThreshold);
         contourAreaSlider.setValue(defaultContourArea);
         this.binaryThreshold = defaultBinaryThreshold;
-        this.contourArea = defaultContourArea;
+        this.contourAreaThreshold = defaultContourArea;
 
         thresholdSlider.addOnChangeListener((slider, value, fromUser) -> binaryThreshold = (int) value);
-        contourAreaSlider.addOnChangeListener((slider, value, fromUser) -> contourArea = (int) value);
+        contourAreaSlider.addOnChangeListener((slider, value, fromUser) -> contourAreaThreshold = (int) value);
 
         cameraBridgeViewBase.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
-            private boolean isFlashlightOn = false;
-            private int illuminatedFrameCount = 0;
-            private int darkFrameCount = 0;
-            private int spaceCount = 0;
             private final StringBuilder morseCodeBuilder = new StringBuilder();
-            private List<String> wordList = new ArrayList<>();
-            private boolean startDetected = true;
             private final MorseCodeHandler morseCodeHandler = new MorseCodeHandler();
+            private boolean isFlashlightOn = false;
+            private int brightFrameCount = 0;
+            private int dimFrameCount = 0;
+            private int spaceCount = 0;
+            private List<String> words = new ArrayList<>();
+            private boolean isStartDetected = true;
+
             @Override
             public void onCameraViewStarted(int width, int height) {
             }
@@ -93,20 +94,19 @@ public class ReceivingActivity extends CameraActivity {
                     MatOfPoint contour = contours.get(0);
                     double area = contourArea(contour);
                     Log.d("CONTOUR_AREA", "Contour Area : " + area);
-                    if (area > contourArea) { // Check if the area of the contour exceeds a threshold (flashlight beam size)
-                        illuminatedFrameCount++;
+                    if (area > contourAreaThreshold) { // Check if the area of the contour exceeds a threshold (flashlight beam size)
+                        brightFrameCount++;
                         isFlashlightOn = true;
-                        darkFrameCount = 0;
+                        dimFrameCount = 0;
                         spaceCount = 0;
                     } else {
                         if (isFlashlightOn) {
-                            if (illuminatedFrameCount >= 3) morseCodeBuilder.append("-");
-                            else if (illuminatedFrameCount >= 1) morseCodeBuilder.append(".");
-                            else morseCodeBuilder.append("");
+                            if (brightFrameCount >= 3) morseCodeBuilder.append("-");
+                            else if (brightFrameCount >= 1) morseCodeBuilder.append(".");
                         } else {
                             if (!morseCodeBuilder.toString().equals("")) {
-                                darkFrameCount++;
-                                if (darkFrameCount >= 8) {
+                                dimFrameCount++;
+                                if (dimFrameCount >= 8) {
                                     spaceCount++;
                                     if (spaceCount >= 26) {
                                         morseCodeBuilder.append('_');
@@ -114,7 +114,7 @@ public class ReceivingActivity extends CameraActivity {
                                     } else if (spaceCount == 1 && !morseCodeBuilder.toString().endsWith("_")) {
                                         morseCodeBuilder.append(' ');
 
-                                        Log.d("MORSE_CODE_LENGTH", "Message : " + morseCodeBuilder + ", Length : " +  morseCodeBuilder.length());
+                                        Log.d("MORSE_CODE_LENGTH", "Message : " + morseCodeBuilder + ", Length : " + morseCodeBuilder.length());
                                         String morseCodeBuilderString = morseCodeBuilder.toString();
 
                                         // Check if the Morse code message initiation failed
@@ -128,28 +128,29 @@ public class ReceivingActivity extends CameraActivity {
                                                         .setCancelable(false)
                                                         .show();
                                             });
-                                            startDetected = false;
+                                            isStartDetected = false;
                                             return binary;
                                         }
 
-                                        if (!startDetected) return binary; // Restrict further processing
+                                        if (!isStartDetected)
+                                            return binary; // Restrict further processing
 
                                         // Decode the Morse code message
-                                        String[] characterList = morseCodeBuilderString.substring(6).split(" ");
-                                        List<String> decodedCharacterList = new ArrayList<>();
-                                        for (String character : characterList) {
+                                        String[] characters = morseCodeBuilderString.substring(6).split(" ");
+                                        List<String> decodedCharacters = new ArrayList<>();
+                                        for (String character : characters) {
                                             if (character.contains("_")) {
-                                                decodedCharacterList.add(" ");
+                                                decodedCharacters.add(" ");
                                             }
-                                            decodedCharacterList.add(this.morseCodeHandler.decodeMessage(character.replaceAll("_", " ")));
+                                            decodedCharacters.add(this.morseCodeHandler.decodeMessage(character.replaceAll("_", " ")));
                                         }
-                                        runOnUiThread(() -> receivedMessage.setText(String.join("", decodedCharacterList)));
+                                        runOnUiThread(() -> receivedMessage.setText(String.join("", decodedCharacters)));
                                     }
                                 }
                             }
                         }
-                        Log.d("ILLUMINATED_FRAMES", "Illuminated Frame Count : " + illuminatedFrameCount);
-                        illuminatedFrameCount = 0;
+                        Log.d("ILLUMINATED_FRAMES", "Illuminated Frame Count : " + brightFrameCount);
+                        brightFrameCount = 0;
                         isFlashlightOn = false;
                     }
                 }
@@ -162,15 +163,15 @@ public class ReceivingActivity extends CameraActivity {
                             morseCode = morseCode.substring(6, morseCode.length() - 5);
                             String[] morseCodeList = morseCode.split("_");
                             for (String morseCodeWord : morseCodeList) {
-                                wordList.add(this.morseCodeHandler.decodeMessage(morseCodeWord));
+                                words.add(this.morseCodeHandler.decodeMessage(morseCodeWord));
                             }
-                            String message = String.join(" ", wordList);
+                            String message = String.join(" ", words);
                             Log.d("MORSE_CODED_MESSAGE", "Message: " + message);
                             runOnUiThread(() -> receivedMessage.setText(message));
                             stopReceiving(); // Successfully received
                         }
                         morseCodeBuilder.setLength(0);
-                        wordList = new ArrayList<>();
+                        words = new ArrayList<>();
                     }
                 }
                 return binary;
@@ -212,13 +213,13 @@ public class ReceivingActivity extends CameraActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode==3 && grantResults.length > 0) {
+        if (requestCode == 3 && grantResults.length > 0) {
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) getCameraPermission();
         }
     }
 
     void getCameraPermission() {
-        if(checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{android.Manifest.permission.CAMERA}, 3);
         }
     }
